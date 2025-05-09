@@ -423,7 +423,8 @@ define Build/fit
 		-c $(if $(DEVICE_DTS_CONFIG),$(DEVICE_DTS_CONFIG),"config-1") \
 		-A $(LINUX_KARCH) -v $(LINUX_VERSION), gen-cpio$(if $(TARGET_PER_DEVICE_ROOTFS),.$(ROOTFS_ID/$(DEVICE_NAME))))
 	$(call locked,PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage $(if $(findstring external,$(word 3,$(1))),\
-		-E -B 0x1000 $(if $(findstring static,$(word 3,$(1))),-p 0x1000)) -f $@.its $@.new)
+		-E -B 0x1000 $(if $(findstring static,$(word 3,$(1))),-p 0x1000)) \
+		$(if $(findstring rockchip,$(word 3,$(1))),-E -p 0x1000) -f $@.its $@.new)
 	@mv $@.new $@
 endef
 

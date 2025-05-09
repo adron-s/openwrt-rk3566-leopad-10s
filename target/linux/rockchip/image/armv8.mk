@@ -73,6 +73,24 @@ define Device/friendlyarm_nanopi-r3s
 endef
 TARGET_DEVICES += friendlyarm_nanopi-r3s
 
+define Device/adreamer_leopad-10s
+  DEVICE_VENDOR := Adreamer
+  DEVICE_MODEL := LeoPad 10S
+  SOC := rk3566
+  DEVICE_PACKAGES := kmod-r8169
+  DEVICE_DTS_LOADADDR := 0xFFFFFF00
+endef
+TARGET_DEVICES += adreamer_leopad-10s
+
+define Device/helix_rockchip-generic
+  DEVICE_VENDOR := HeliX
+  DEVICE_MODEL := Rockchip Generic
+  SOC := rk3566
+  DEVICE_PACKAGES := kmod-r8169
+  DEVICE_DTS_LOADADDR := 0xFFFFFF00
+endef
+TARGET_DEVICES += helix_rockchip-generic
+
 define Device/friendlyarm_nanopi-r4s
   DEVICE_VENDOR := FriendlyARM
   DEVICE_MODEL := NanoPi R4S
