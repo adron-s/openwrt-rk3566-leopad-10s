@@ -39,3 +39,5 @@ ttt/
 target/linux/rockchip/my-rk3566/131-arm64-dts-rockchip-rk3566-add-helix-rockchips.patch
 target/linux/rockchip/my-rk3566/a/
 target/linux/rockchip/my-rk3566/old/
+target/linux/rockchip/patches-6.6/131-arm64-dts-rockchip-rk3566-add-helix-rockchips.patch
+
