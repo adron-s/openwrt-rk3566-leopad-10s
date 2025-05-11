@@ -1,0 +1,43 @@
+#!/bin/sh
+
+is_youngdel() {
+	local symp=$(dd if=/dev/mmcblk1p1 bs=1 skip=$((0xecff2)) count=9 2>/dev/null)
+
+	if [ "${symp}" = "youngfeel" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+false && {
+mkdir -p /mnt/floppy
+
+for dev in $(ls /dev/mmcblk*p1); do
+	echo "Processing ${dev}"
+	mount -t vfat ${dev} /mnt/floppy/ && {
+		echo "Mount OK!"
+		dmesg > /mnt/floppy/owl-dmesg.txt
+		echo "Hello there!" > /mnt/floppy/owl-hi.txt
+		sync
+		umount /mnt/floppy
+		sync
+	}
+done
+
+echo "Mount-OWL is done"
+#echo 5 > /proc/sys/kernel/panic
+#sleep 60
+#echo c > /proc/sysrq-trigger
+}
+
+
+is_youngdel && {
+	echo "Activating YF-023D vcc5v0-host-regulator gpio"
+	echo 6 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio6/direction
+	echo 1 > /sys/class/gpio/gpio6/value
+}
+
+#insmod g_ncm iProduct=helix iManufacturer=helix 
+#	dev_addr=00:0d:88:23:12:a0 host_addr=00:0d:88:23:12:a1
