@@ -78,7 +78,8 @@ define Device/adreamer_leopad-10s
   DEVICE_MODEL := LeoPad 10S
   SOC := rk3566
   DEVICE_PACKAGES := kmod-r8169
-  DEVICE_DTS_LOADADDR := 0xFFFFFF00
+  KERNEL_LOADADDR := 0x00a80000
+  DEVICE_DTS_LOADADDR := 0x0a10d000
 endef
 TARGET_DEVICES += adreamer_leopad-10s
 

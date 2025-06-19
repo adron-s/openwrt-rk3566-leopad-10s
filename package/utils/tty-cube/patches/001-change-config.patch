@@ -1,0 +1,14 @@
+diff -rNu a/config.h b/config.h
+--- a/config.h	2025-04-17 02:47:54.000000000 +0300
++++ b/config.h	2025-05-17 09:39:43.133464717 +0300
+@@ -1,8 +1,8 @@
+ #define FB_DEVICE "/dev/fb0"
+-#define INPUT_DEVICE "/dev/input/event3"
++#define INPUT_DEVICE "/dev/input/event0"
+ #define RENDER_OVER_TEXT 0
+ #define RENDER_BOUNDING_BOX 1
+-#define FRAME_LIMIT 60 // 0 to deactivate
++#define FRAME_LIMIT 0 // 0 to deactivate
+ #define SHADING 1
+ #define SPECULAR_HIGHLIGHT 1 // SHADING has to be on for this to work
+ #define SPEED 1

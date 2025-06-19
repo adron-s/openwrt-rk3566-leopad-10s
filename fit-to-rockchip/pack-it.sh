@@ -9,6 +9,7 @@ KERNEL_FILE=Image-initramfs # ARM64 image
 DTB_FILE_GEN=image-rk3566-rockchip-generic.dtb
 DTB_FILE_LEO=image-rk3566-leopad-10s.dtb
 DTB_FILE=${DTB_FILE_LEO}
+#DTB_FILE=${DTB_FILE_GEN}
 OPENWRT_BUILD_DIR=/home/adron/rockchip/openwrt/build_dir/target-aarch64_generic_musl/linux-rockchip_armv8
 
 cd ${WORK_DIR}
@@ -27,7 +28,8 @@ cat ${BINS_DIR}/dtb.img > ${RESOURCE_DIR}/rk-kernel.dtb
 #./mkimage -E -p 0x1000 -f fit8-1.its ${RESULT_FILE} # работает и так
 ./mkimage -E -p 0x800 -f fit8-1.its ${RESULT_FILE} # и вот так (у IF-023D именно так).
 
-dtc -I dtb -O dts -o ${BINS_DIR}/openwrt_new_fit-XXL.dts ${RESULT_FILE}
+dtc -I dtb -O dts -o ${BINS_DIR}/openwrt_new_fit-XXL.dts ${RESULT_FILE} 2>/dev/null
+dtc -I dtb -O dts -o ${BINS_DIR}/openwrt_kernel_fdt-XXL.dts ${BINS_DIR}/dtb.img 2>/dev/null
 
 echo ""
 echo "The result (FIT image) file is: ${RESULT_FILE}"

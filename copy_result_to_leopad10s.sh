@@ -7,7 +7,8 @@ RESULT_FILE3=openwrt-rockchip-armv8-helix_rockchip-generic-initramfs-kernel.bin
 RESULT_DIR=/home/adron/rockchip/openwrt/build_dir/target-aarch64_generic_musl/linux-rockchip_armv8
 #RESULT_FILE=helix_rockchip-generic-kernel.bin # FIT image!
 RESULT_FILE=Image-initramfs # ARM64 image
-RESULT_FILE2=image-rk3566-rockchip-generic.dtb # DTB
+#RESULT_FILE2=image-rk3566-rockchip-generic.dtb # DTB
+RESULT_FILE2=image-rk3566-leopad-10s.dtb # DTB
 
 #SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 #SSH_OPTS="-i ssh_authorized_keys"

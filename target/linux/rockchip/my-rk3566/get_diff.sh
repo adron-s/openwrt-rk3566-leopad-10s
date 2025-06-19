@@ -5,7 +5,7 @@ TARGET_WATCH_DIR=./b
 ACTION=${1:-watch}
 
 do_diff() {
-	diff -rNu a b > ./${RESULT_DIFF}
+	diff --exclude="build_debug_it.sh" --exclude="old" -rNu a b > ./${RESULT_DIFF}
 	cat ./${RESULT_DIFF} > /home/adron/rockchip/openwrt/target/linux/rockchip/patches-6.6/${RESULT_DIFF}
 }
 
@@ -14,6 +14,7 @@ if [ "${ACTION}" = "watch" ]; then
 		do_diff
 		echo "Waiting for changes on dir: ${TARGET_WATCH_DIR}"
 		inotifywait -q -e modify ${TARGET_WATCH_DIR} -r
+		date
 	done
 else
 	do_diff

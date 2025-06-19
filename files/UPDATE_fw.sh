@@ -1,0 +1,1 @@
+./get_new_fw_19.sh

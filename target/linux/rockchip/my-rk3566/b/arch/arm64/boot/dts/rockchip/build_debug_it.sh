@@ -1,0 +1,1 @@
+/home/adron/rockchip/openwrt/build_debug_it.sh
