@@ -26,6 +26,26 @@
 		bootargs = "console=tty0 console=ttyS2,1500000n8";
 	};
 
+	adc-keys {
+		compatible = "adc-keys";
+		io-channels = <&saradc 0>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		vol-up-key {
+			label = "volume-up";
+			linux,code = <KEY_KP9>;
+			press-threshold-microvolt = <1750>;
+		};
+		vol-down-key {
+			label = "volume-down";
+			linux,code = <KEY_KP8>;
+			press-threshold-microvolt = <297500>;
+		};
+	};
+
+
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		power-supply = <&vcc3v3_sys>;
@@ -623,6 +643,12 @@
 &tsadc {
 	status = "okay";
 };
+
+&saradc {
+	vref-supply = <&vcc_1v8>;
+	status = "okay";
+};
+
 
 &uart2 {
 	status = "okay";
