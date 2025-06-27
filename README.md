@@ -1,3 +1,20 @@
+## About this project.
+
+This project includes a working driver for WiFi Unisoc UWE5621 Wi-Fi 5/BT5 under Linux 6.6 kernel.
+It also contains the simple-panel-dsi driver for working with legacy dts LCD panel description format.
+
+OpenWRT was chosen for the ability to quickly make changes to the Linux kernel and test these changes
+on real hardware (Adreamer Leopad 10S tablet on the RK3566 platform - for 73 euros from Aliexpress).
+
+The resulting image is launched by the standard UBoot bootloader from the recovery partition.
+This way we get dual-boot for OpenWrt and Android. You can switch between them with the following commands:
+
+	parted /dev/mmcblk2 name 13 recovery
+
+	parted /dev/mmcblk2 name 13 backup
+
+	sgdisk --change-name=13:recovery /dev/block/mmcblk2
+
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
