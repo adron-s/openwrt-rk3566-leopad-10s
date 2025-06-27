@@ -8,12 +8,15 @@ RESULT_DIR=/home/adron/rockchip/openwrt/build_dir/target-aarch64_generic_musl/li
 #RESULT_FILE=helix_rockchip-generic-kernel.bin # FIT image!
 RESULT_FILE=Image-initramfs # ARM64 image
 RESULT_FILE2=image-rk3566-rockchip-generic.dtb # DTB
+RESULT_FILE2_LEO=image-rk3566-leopad-10s.dtb
 
 DEST_DIR=./ttt
 RESULT_SIZE=$(du -b ${RESULT_DIR}/${RESULT_FILE} | awk '{print $1}')
 
 if [ "${1}" = "leo" ]; then
+#	echo "${RESULT_DIR}"
 	cat ${RESULT_DIR3}/${RESULT_FILE3_LEO} | nc -l -p 1111 -q 1
+	cat ${RESULT_DIR}/${RESULT_FILE2_LEO} | nc -l -p 1111 -q 1
 else
 	cat ${RESULT_DIR3}/${RESULT_FILE3_GEN} | nc -l -p 1111 -q 1
 fi

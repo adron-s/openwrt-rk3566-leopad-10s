@@ -20,6 +20,11 @@ rm -f ${OPENWRT_BUILD_DIR}/${DTB_FILE}
 rm -f ${KERNEL_DTS_DIR}/${KERNEL_DTB_FILE}
 cat ${PATCH_DTS_DIR}/${KERNEL_DTS_FILE} > ${KERNEL_DTS_DIR}/${KERNEL_DTS_FILE}
 
+[ "${1}" = "do-not-compile" ] && {
+	echo "The new dts is copied to the kernel dir:\n  ${KERNEL_DTS_DIR}/${KERNEL_DTS_FILE}"
+	exit 0
+}
+
 # I just made a mistake in the dts file and copied the last command that OpenWrt ran to build the kernel.
 make -C ${OPENWRT_KERNEL_DIR} \
 	KCFLAGS="-fmacro-prefix-map=${OPENWRT_DIR}/build_dir/target-aarch64_generic_musl=target-aarch64_generic_musl -fno-caller-saves " \
