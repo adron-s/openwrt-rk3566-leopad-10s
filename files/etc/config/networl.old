@@ -16,7 +16,10 @@ config interface 'port2'
   option proto 'dhcp'
 
 config interface 'wifi'
-  option proto 'dhcp'
+  option ifname 'phy0-sta0'
+  option proto 'static'
+	option ipaddr '192.168.248.5'
+	option netmask '255.255.255.0'
 
 config interface 'usb0'
   option ifname 'usb0'
