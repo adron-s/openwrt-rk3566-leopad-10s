@@ -1,0 +1,9 @@
+diff -rNu a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
+--- a/drivers/net/wireless/Makefile	2025-04-10 15:37:44.000000000 +0300
++++ b/drivers/net/wireless/Makefile	2025-06-21 12:26:10.378356615 +0300
+@@ -25,3 +25,5 @@
+ 
+ obj-$(CONFIG_WLAN) += legacy/
+ obj-$(CONFIG_WLAN) += virtual/
++
++obj-$(CONFIG_SPARD_WLAN_SUPPORT) += uwe5622/
