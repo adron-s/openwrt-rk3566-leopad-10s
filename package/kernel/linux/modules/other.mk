@@ -1063,3 +1063,20 @@ define KernelPackage/mhi-pci-generic/description
 endef
 
 $(eval $(call KernelPackage,mhi-pci-generic))
+
+define KernelPackage/sprdwl-ng
+  SUBMENU:=$(OTHER_MENU)
+  TITLE:=SPRD Next Generation Wireless LAN Support
+  KCONFIG:=CONFIG_SPRDWL_NG
+  FILES:= \
+	  $(LINUX_DIR)/net/wireless/cfg80211.ko \
+	  $(LINUX_DIR)/drivers/net/wireless/uwe5622/unisocwifi/sprdwl_ng.ko
+  AUTOLOAD:=$(call AutoProbe,sprdwl_ng)
+endef
+
+define KernelPackage/sprdwl-ng/description
+  This is a driver for the Spreadtrum IEEE802.11 WLAN devices.
+  When compiled as a module, this driver will be called sprdwl_ng.
+endef
+
+$(eval $(call KernelPackage,sprdwl-ng))
