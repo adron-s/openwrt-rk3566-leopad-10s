@@ -24,7 +24,7 @@
 
 	chosen: chosen {
 		stdout-path = "serial2:1500000n8";
-		bootargs = "console=tty0 console=ttyS2,1500000n8 logo.nologo";
+		bootargs = "console=tty0 console=ttyS2,1500000n8";
 	};
 
 	adc-keys {
@@ -91,10 +91,10 @@
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&rk817 1>;
 		clock-names = "ext_clock";
-		//pinctrl-names = "default";
-		//pinctrl-0 = <&wifi_enable_h>;
-    //reset-gpios = <&gpio0 RK_PC0 GPIO_ACTIVE_LOW>; // chip_en (wl-reg-on)
-		/* The UWE driver is responsible for reset control. Otherwise, the card detection does not pass. */
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_enable_h>;
+		post-power-on-delay-ms = <200>;
+    reset-gpios = <&gpio0 RK_PC0 GPIO_ACTIVE_LOW>; // chip_en (wl-reg-on)
 	};
 
 	sprd-wlan {
@@ -107,7 +107,7 @@
 		// communicate, and function properly on your board. Without it, the kernel won’t know how to talk to the chip,
 		// even if the hardware is present.
 		compatible = "unisoc,uwe_bsp";
-		wl-reg-on = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>;
+		// wl-reg-on = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>; // handled by sdio-pwrseq
 		bt-reg-on = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
 		sdio-ext-int-gpio = <&gpio0 RK_PC3 GPIO_ACTIVE_HIGH>;
 		unisoc,btwf-file-name = "/lib/firmware/uwe5622/wcnmodem.bin";
@@ -115,9 +115,7 @@
 		bt-wake-host-gpio = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
 		blksz-512;
 		keep-power-on;
-		//data-irq;
-		sdma-tx;
-		sdma-rx;
+		//data-irq; // !!! TODO !!!
 		status = "okay";
 	};
 
@@ -706,10 +704,17 @@
 	//max-frequency = <200000000>;
 	pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_cmd &sdmmc1_clk>;
 	sd-uhs-sdr104;
-	broken-cd;
-	//mmc-pwrseq = <&sdio_pwrseq>;
+	non-removable;
+	no-mmc;
+	no-sd;
+	mmc-pwrseq = <&sdio_pwrseq>;
 	rockchip,default-sample-phase = <90>;
 	status = "okay";
+
+/*	wifi@1 {
+		reg = <1>;
+		compatible = "sprd,uwe5622-wifi";
+	}; */
 };
 
 &sdhci {

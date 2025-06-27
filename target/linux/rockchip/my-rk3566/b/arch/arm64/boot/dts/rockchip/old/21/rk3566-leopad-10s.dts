@@ -93,8 +93,8 @@
 		clock-names = "ext_clock";
 		//pinctrl-names = "default";
 		//pinctrl-0 = <&wifi_enable_h>;
+		post-power-on-delay-ms = <500>;
     //reset-gpios = <&gpio0 RK_PC0 GPIO_ACTIVE_LOW>; // chip_en (wl-reg-on)
-		/* The UWE driver is responsible for reset control. Otherwise, the card detection does not pass. */
 	};
 
 	sprd-wlan {
@@ -115,9 +115,9 @@
 		bt-wake-host-gpio = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
 		blksz-512;
 		keep-power-on;
-		//data-irq;
-		sdma-tx;
-		sdma-rx;
+		//data-irq; // !!! TODO !!!
+		sdma-tx; // !!! TODO !!!
+		sdma-rx; // !!! TODO !!!
 		status = "okay";
 	};
 
@@ -706,10 +706,20 @@
 	//max-frequency = <200000000>;
 	pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_cmd &sdmmc1_clk>;
 	sd-uhs-sdr104;
+	//no-mmc;
+	//no-sd;
+	//non-removable;
 	broken-cd;
 	//mmc-pwrseq = <&sdio_pwrseq>;
 	rockchip,default-sample-phase = <90>;
 	status = "okay";
+
+	/*wifi@1 {
+		reg = <1>;
+		//compatible = "sprd,uwe5622-wifi";
+		compatible = "sprd,unisoc-wifi";
+		status = "okay";
+	};*/
 };
 
 &sdhci {
