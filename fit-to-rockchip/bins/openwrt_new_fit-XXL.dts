@@ -1,9 +1,9 @@
 /dts-v1/;
 
-/memreserve/	0x00007329c3600000 0x0000000000000600;
+/memreserve/	0x00007fcc57400000 0x0000000000000600;
 / {
 	totalsize = <0x1b7fa00>;
-	timestamp = <0x685ead66>;
+	timestamp = <0x685ece1f>;
 	version = <0x00>;
 	description = "U-Boot FIT source file for arm";
 	#address-cells = <0x01>;
@@ -35,7 +35,7 @@
 			load = <0x3200000>;
 
 			hash {
-				value = <0x753dde1f 0x65d412c4 0x50ef08c6 0x2d0f08f8 0xe6ef2fbc 0x31a1cc5a 0x2162a602 0x9fd4b42f>;
+				value = <0x44ca1a7b 0x92d02dff 0x96255b90 0x8271c657 0x894deaad 0x5ad1e351 0x85be1b 0xa80fc22f>;
 				algo = "sha256";
 			};
 		};
@@ -48,7 +48,7 @@
 			compression = "none";
 
 			hash {
-				value = <0x1055585b 0x12236a7a 0x6068c25 0x2416c8da 0x6859476e 0xa13851c8 0xbf7e02d3 0xa776c77e>;
+				value = <0x69dc0123 0x575f2ca1 0xf316fd3c 0x292a55c1 0x6df7c1e0 0xe5c88f9a 0x80ce1ce3 0x7ce0ddd9>;
 				algo = "sha256";
 			};
 		};

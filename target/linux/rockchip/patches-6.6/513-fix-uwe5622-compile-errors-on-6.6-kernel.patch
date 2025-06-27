@@ -359,7 +359,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	if (priv->fw_capa & SPRDWL_CAPA_NS_OFFLOAD)
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wireless/uwe5622/unisocwifi/Makefile
 --- a/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-21 12:28:39.663532647 +0300
-+++ b/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-27 19:54:27.554934681 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-27 20:03:29.536446370 +0300
 @@ -2,6 +2,8 @@
  all_dependencies := driver
  
@@ -369,12 +369,14 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wirel
  ifneq ($(UNISOC_BSP_INCLUDE),)
  ccflags-y += -I$(UNISOC_BSP_INCLUDE)
  endif
-@@ -23,8 +25,8 @@
+@@ -22,9 +24,9 @@
+ 
  ####add cflag######
  ccflags-y += -DUWE5621_FTR
- ccflags-y += -DIBSS_SUPPORT -DIBSS_RSN_SUPPORT
+-ccflags-y += -DIBSS_SUPPORT -DIBSS_RSN_SUPPORT
 -ccflags-y += -DNAN_SUPPORT
 -ccflags-y += -DRTT_SUPPORT
++#ccflags-y += -DIBSS_SUPPORT -DIBSS_RSN_SUPPORT
 +#ccflags-y += -DNAN_SUPPORT
 +#ccflags-y += -DRTT_SUPPORT
  ccflags-y += -DACS_SUPPORT -DRX_HW_CSUM
