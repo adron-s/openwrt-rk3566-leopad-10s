@@ -1,0 +1,415 @@
+diff -rNu a/drivers/net/wireless/uwe5622/Kconfig b/drivers/net/wireless/uwe5622/Kconfig
+--- a/drivers/net/wireless/uwe5622/Kconfig	2025-06-21 12:28:39.699534137 +0300
++++ b/drivers/net/wireless/uwe5622/Kconfig	2025-06-23 17:12:39.832565728 +0300
+@@ -1,6 +1,6 @@
+ config SPARD_WLAN_SUPPORT
+ 	bool "Unisoc wireless Support"
+-	select RK_WIFI_DEVICE_UWE5622  if SPARD_WLAN_SUPPORT
++	select RK_WIFI_DEVICE_UWE5621  if SPARD_WLAN_SUPPORT
+ 	default n
+ 	help
+ 	  This is support for spreadtrum wireless chip.
+diff -rNu a/drivers/net/wireless/uwe5622/Makefile b/drivers/net/wireless/uwe5622/Makefile
+--- a/drivers/net/wireless/uwe5622/Makefile	2025-06-21 12:28:39.699534137 +0300
++++ b/drivers/net/wireless/uwe5622/Makefile	2025-06-24 14:08:38.325976308 +0300
+@@ -1,10 +1,13 @@
+-obj-$(CONFIG_RK_WIFI_DEVICE_UWE5622) += unisocwcn/
+-obj-$(CONFIG_WLAN_UWE5622)    += unisocwifi/
++obj-$(CONFIG_RK_WIFI_DEVICE_UWE5621) += unisocwcn/
++obj-$(CONFIG_WLAN_UWE5621)    += unisocwifi/
+ obj-$(CONFIG_TTY_OVERY_SDIO)  += tty-sdio/
+ 
+ UNISOCWCN_DIR := $(shell cd $(src)/unisocwcn/ && /bin/pwd)
+ UNISOC_BSP_INCLUDE := $(UNISOCWCN_DIR)/include
+ export UNISOC_BSP_INCLUDE
+ 
++TARGET_BUILD_VARIANT := user
++export TARGET_BUILD_VARIANT
++
+ UNISOC_FW_PATH_CONFIG := "/lib/firmware/uwe5622/"
+ export UNISOC_FW_PATH_CONFIG
+diff -rNu a/drivers/net/wireless/uwe5622/tty-sdio/Makefile b/drivers/net/wireless/uwe5622/tty-sdio/Makefile
+--- a/drivers/net/wireless/uwe5622/tty-sdio/Makefile	2025-06-21 12:28:39.699534137 +0300
++++ b/drivers/net/wireless/uwe5622/tty-sdio/Makefile	2025-06-23 17:41:39.667898869 +0300
+@@ -1,6 +1,6 @@
+ # ccflags-y += -DDEBUG
+ # ccflags-y += -DKERNEL_VERSION_414
+-ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5622),y)
++ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5621),y)
+ ccflags-y += -I$(srctree)/drivers/net/wireless/uwe5622/sprdwcn/include
+ endif
+ #ccflags-y += -DOTT_UWE
+@@ -10,7 +10,7 @@
+ ccflags-y += -I$(UNISOC_BSP_INCLUDE)
+ endif
+ 
+-ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5622),y)
++ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5621),y)
+ sprdbt_tty-objs := \
+ 	tty.o \
+ 	rfkill.o \
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwcn/Makefile b/drivers/net/wireless/uwe5622/unisocwcn/Makefile
+--- a/drivers/net/wireless/uwe5622/unisocwcn/Makefile	2025-06-21 12:28:39.699534137 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwcn/Makefile	2025-06-23 18:18:43.081654299 +0300
+@@ -60,8 +60,8 @@
+ ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5621),y)
+ export CONFIG_WCN_SDIO = y
+ #export CONFIG_WCN_USB = y
+-#ccflags-y += -DCONFIG_CHECK_DRIVER_BY_CHIPID
+-ccflags-y += -DCONFIG_UWE5621
++ccflags-y += -DCONFIG_CHECK_DRIVER_BY_CHIPID
++#ccflags-y += -DCONFIG_UWE5621
+ BSP_CHIP_ID := uwe5621
+ WCN_HW_TYPE := sdio
+ endif
+@@ -287,10 +287,10 @@
+ #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
+ #ccflags-y += -DCONFIG_WCN_RESUME_KEEPPWR_RESETSDIO
+ #ccflags-y += -DCONFIG_WCN_CHECK_MODULE_VENDOR
+-ifneq ($(TARGET_BUILD_VARIANT),user)
++#ifneq ($(TARGET_BUILD_VARIANT),user)
+ #ccflags-y += -DCONFIG_WCN_LOOPCHECK
+-ccflags-y += -DCONFIG_CPLOG_DEBUG
+-endif
++#ccflags-y += -DCONFIG_CPLOG_DEBUG
++#endif
+ #ccflags-y += -DCONFIG_MEM_PD
+ 
+ all_dependencies += install
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c
+--- a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c	2025-06-21 12:28:39.702534261 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c	2025-06-21 12:45:18.188046229 +0300
+@@ -1482,6 +1482,7 @@
+ 	sdiohal_rx_up();
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
+ static int sdiohal_suspend(struct device *dev)
+ {
+ 	struct sdiohal_data_t *p_data = sdiohal_get_data();
+@@ -1551,7 +1552,9 @@
+ 
+ 	return 0;
+ }
++#endif /* CONFIG_PM_SLEEP */
+ 
++#ifdef CONFIG_PM_SLEEP
+ static int sdiohal_resume(struct device *dev)
+ {
+ 	struct sdiohal_data_t *p_data = sdiohal_get_data();
+@@ -1682,6 +1685,7 @@
+ 
+ 	return 0;
+ }
++#endif /* CONFIG_PM_SLEEP */
+ 
+ int sdiohal_runtime_get(void)
+ {
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2025-06-21 12:28:39.710534592 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2025-06-27 16:33:39.790537478 +0300
+@@ -429,7 +429,7 @@
+ 	if (!vif->ndev)
+ 		mac = vif->wdev.address;
+ 	else
+-		mac = vif->ndev->dev_addr;
++		mac = (u8 *)vif->ndev->dev_addr;
+ 
+ 	if (sprdwl_open_fw(priv, &vif_ctx_id, vif->mode, mac)) {
+ 		wl_ndev_log(L_ERR, vif->ndev, "%s failed!\n", __func__);
+@@ -1186,6 +1186,29 @@
+ }
+ #endif
+ 
++static int sprdwl_cfg80211_dump_station(struct wiphy *wiphy,
++					   struct net_device *ndev, int idx, u8 *mac,
++					   struct station_info *sinfo)
++{
++	if (idx > 0) {
++		return -ENOENT;
++	} else {
++		struct sprdwl_vif *vif = netdev_priv(ndev);
++		/* Fill in the MAC of the AP you're connected to. */
++		memcpy(mac, vif->bssid, ETH_ALEN);
++		return sprdwl_cfg80211_get_station(wiphy, ndev, mac, sinfo);
++	}
++
++}
++
++static int sprdwl_cfg80211_get_txpower(struct wiphy *wiphy,
++				       struct wireless_dev *wdev,
++				       int *dbm)
++{
++	*dbm = 17;
++	return 0;
++}
++
+ static int sprdwl_cfg80211_set_channel(struct wiphy *wiphy,
+ 					   struct net_device *ndev,
+ 					   struct ieee80211_channel *chan)
+@@ -1759,9 +1782,11 @@
+ 	enum sm_state old_state = vif->sm_state;
+ 	int ret;
+ #ifdef SYNC_DISCONNECT
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 60)
+ 	u32 msec;
+ 	ktime_t kt;
+ #endif
++#endif
+ #ifdef STA_SOFTAP_SCC_MODE
+ 	struct sprdwl_intf *intf = (struct sprdwl_intf *)vif->priv->hw_priv;
+ 	intf->sta_home_channel = 0;
+@@ -3278,6 +3303,8 @@
+ 	.del_station = sprdwl_cfg80211_del_station,
+ 	.change_station = sprdwl_cfg80211_change_station,
+ 	.get_station = sprdwl_cfg80211_get_station,
++	.dump_station = sprdwl_cfg80211_dump_station,
++	.get_tx_power = sprdwl_cfg80211_get_txpower,
+ 	.libertas_set_mesh_channel = sprdwl_cfg80211_set_channel,
+ 	.scan = sprdwl_cfg80211_scan,
+ 	.connect = sprdwl_cfg80211_connect,
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c b/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2025-06-21 12:28:39.703534302 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2025-06-23 19:02:08.320465484 +0300
+@@ -264,8 +264,10 @@
+ #endif
+ #endif
+ 	if (!cmd->wake_lock) {
++#ifdef CONFIG_PM_SLEEP
+ 		wl_err("%s wakeup source register error.\n", __func__);
+ 		return -EINVAL;
++#endif /* CONFIG_PM_SLEEP */
+ 	}
+ 
+ #ifdef CP2_RESET_SUPPORT
+@@ -333,8 +335,10 @@
+ 	}
+ 	sprdwl_cmd_clean(cmd);
+ 	mutex_destroy(&cmd->cmd_lock);
++#ifdef CONFIG_PM_SLEEP
+ 	if (cmd->wake_lock)
+ 		wakeup_source_unregister(cmd->wake_lock);
++#endif /* CONFIG_PM_SLEEP */
+ #ifdef CP2_RESET_SUPPORT
+ 	cmd->init_ok = 0;
+ #endif
+@@ -343,7 +347,9 @@
+ extern struct sprdwl_intf_ops g_intf_ops;
+ static int sprdwl_cmd_lock(struct sprdwl_cmd *cmd)
+ {
++#ifdef CONFIG_PM_SLEEP
+ 	struct sprdwl_intf *intf = (struct sprdwl_intf *)g_intf_ops.intf;
++#endif /* CONFIG_PM_SLEEP */
+ 
+ #ifdef CP2_RESET_SUPPORT
+ 	if (!unlikely(cmd->init_ok))
+@@ -358,8 +364,10 @@
+ 		return -1;
+ 	}
+ 	mutex_lock(&cmd->cmd_lock);
++#ifdef CONFIG_PM_SLEEP
+ 	if (intf->priv->is_suspending == 0)
+ 		__pm_stay_awake(cmd->wake_lock);
++#endif /* CONFIG_PM_SLEEP */
+ 
+ #ifdef UNISOC_WIFI_PS
+ 	if (SPRDWL_PS_SUSPENDED == intf->suspend_mode) {
+@@ -385,8 +393,10 @@
+ 
+ 	mutex_unlock(&cmd->cmd_lock);
+ 	atomic_dec(&cmd->refcnt);
++#ifdef CONFIG_PM_SLEEP
+ 	if (intf->priv->is_suspending == 0)
+ 		__pm_relax(cmd->wake_lock);
++#endif /* CONFIG_PM_SLEEP */
+ 	if (intf->priv->is_suspending == 1)
+ 		intf->priv->is_suspending = 0;
+ }
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireless/uwe5622/unisocwifi/main.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-21 12:28:39.703534302 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-27 16:32:45.206250982 +0300
+@@ -944,12 +944,12 @@
+ 		if (!is_zero_ether_addr(sa->sa_data)) {
+ 			vif->has_rand_mac = true;
+ 			memcpy(vif->random_mac, sa->sa_data, ETH_ALEN);
+-			memcpy(dev->dev_addr, sa->sa_data, ETH_ALEN);
++			memcpy((void *)dev->dev_addr, sa->sa_data, ETH_ALEN);
+ 		} else {
+ 			vif->has_rand_mac = false;
+ 			netdev_info(dev, "need clear random mac for sta/softap mode\n");
+ 			memset(vif->random_mac, 0, ETH_ALEN);
+-			memcpy(dev->dev_addr, vif->mac, ETH_ALEN);
++			memcpy((void *)dev->dev_addr, vif->mac, ETH_ALEN);
+ 		}
+ 	}
+ 	/*return success to pass vts test*/
+@@ -1118,6 +1118,7 @@
+ 	case NL80211_IFTYPE_P2P_CLIENT:
+ 	case NL80211_IFTYPE_P2P_GO:
+ 		addr[4] ^= 0x80;
++		fallthrough;
+ 	case NL80211_IFTYPE_P2P_DEVICE:
+ 		addr[0] ^= 0x02;
+ 		break;
+@@ -1448,7 +1449,7 @@
+ 	ndev->features |= NETIF_F_SG;
+ 	SET_NETDEV_DEV(ndev, wiphy_dev(priv->wiphy));
+ 
+-	sprdwl_set_mac_addr(vif, addr, ndev->dev_addr);
++	sprdwl_set_mac_addr(vif, addr, (void *)ndev->dev_addr);
+ 
+ #ifdef CONFIG_P2P_INTF
+ 	if (type == NL80211_IFTYPE_P2P_DEVICE)
+@@ -1456,7 +1457,7 @@
+ #endif
+ 
+ 	/* register new Ethernet interface */
+-	ret = register_netdevice(ndev);
++	ret = cfg80211_register_netdevice(ndev);
+ 	if (ret) {
+ 		wl_ndev_log(L_ERR, ndev, "failed to regitster netdev(%d)!\n", ret);
+ 		goto err;
+@@ -1478,7 +1479,7 @@
+ 	if (vif->priv->fw_capa & SPRDWL_CAPA_MC_FILTER)
+ 		kfree(vif->mc_filter);
+ 	sprdwl_deinit_vif(vif);
+-	unregister_netdevice(vif->ndev);
++	cfg80211_unregister_netdevice(vif->ndev);
+ }
+ 
+ struct wireless_dev *sprdwl_add_iface(struct sprdwl_priv *priv,
+@@ -1528,9 +1529,33 @@
+ 	return 0;
+ }
+ 
++void sprdwl_check_all_ifaces_for_up(struct sprdwl_priv *priv)
++{
++	struct sprdwl_vif *vif;
++
++next_intf:
++	spin_lock_bh(&priv->list_lock);
++	list_for_each_entry_reverse(vif, &priv->vif_list, vif_node) {
++		if (vif->ndev) {
++			if (netif_running(vif->ndev)) {
++				wl_err("interface '%s' is still up!\n", vif->ndev->name);
++				spin_unlock_bh(&priv->list_lock);
++				/* Down the interface so that its removal goes smoothly. */
++				rtnl_lock();
++        dev_close(vif->ndev);
++        rtnl_unlock();
++				goto next_intf;
++			}
++		}
++	}
++
++	spin_unlock_bh(&priv->list_lock);
++}
++
+ static void sprdwl_del_all_ifaces(struct sprdwl_priv *priv)
+ {
+ 	struct sprdwl_vif *vif;
++	struct wiphy *wiphy = priv->wiphy;
+ 
+ next_intf:
+ 	spin_lock_bh(&priv->list_lock);
+@@ -1538,7 +1563,9 @@
+ 		list_del(&vif->vif_node);
+ 		spin_unlock_bh(&priv->list_lock);
+ 		rtnl_lock();
++		wiphy_lock(wiphy);
+ 		sprdwl_del_iface(priv, vif);
++		wiphy_unlock(wiphy);
+ 		rtnl_unlock();
+ 		goto next_intf;
+ 	}
+@@ -1584,8 +1611,16 @@
+ 	}
+ 	sprdwl_init_debugfs(priv);
+ 
++	/* Generate a random MAC address for wlan0 */
++	eth_random_addr(priv->mac_addr);
++	priv->mac_addr[0] = 0x40;
++	priv->mac_addr[1] = 0x45;
++	priv->mac_addr[2] = 0xda;
++
+ 	rtnl_lock();
++	wiphy_lock(wiphy);
+ 	wdev = sprdwl_add_iface(priv, "wlan%d", NL80211_IFTYPE_STATION, NULL);
++	wiphy_unlock(wiphy);
+ 	rtnl_unlock();
+ 	if (IS_ERR(wdev)) {
+ 		wiphy_unregister(wiphy);
+@@ -1595,7 +1630,9 @@
+ 
+ #ifdef CONFIG_P2P_INTF
+ 	rtnl_lock();
++	wiphy_lock(wiphy);
+ 	wdev = sprdwl_add_iface(priv, "p2p%d", NL80211_IFTYPE_P2P_DEVICE, NULL);
++	wiphy_unlock(wiphy);
+ 	rtnl_unlock();
+ 	if (IS_ERR(wdev)) {
+ 		wiphy_unregister(wiphy);
+@@ -1639,6 +1676,7 @@
+ 
+ int sprdwl_core_deinit(struct sprdwl_priv *priv)
+ {
++	sprdwl_check_all_ifaces_for_up(priv);
+ 	marlin_reset_unregister_notify();
+ 	unregister_inetaddr_notifier(&sprdwl_inetaddr_cb);
+ 	if (priv->fw_capa & SPRDWL_CAPA_NS_OFFLOAD)
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wireless/uwe5622/unisocwifi/Makefile
+--- a/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-21 12:28:39.663532647 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-21 13:28:48.579937831 +0300
+@@ -2,6 +2,8 @@
+ all_dependencies := driver
+ 
+ 
++ccflags-y += -Wno-attribute-warning
++
+ ifneq ($(UNISOC_BSP_INCLUDE),)
+ ccflags-y += -I$(UNISOC_BSP_INCLUDE)
+ endif
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/reorder.c b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/reorder.c	2025-06-21 12:28:39.667532812 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c	2025-06-21 13:23:08.300755049 +0300
+@@ -216,7 +216,7 @@
+ 			kfree_skb_list(pkt->skb);
+ 	}
+ 
+-	memset(pkt, 0, sizeof(struct rx_ba_pkt));
++	memset(pkt, 0, sizeof(*pkt));
+ }
+ 
+ static inline void flush_reorder_buffer(struct rx_ba_node_desc *ba_node_desc)
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/vendor.c b/drivers/net/wireless/uwe5622/unisocwifi/vendor.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/vendor.c	2025-06-21 12:28:39.705534385 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/vendor.c	2025-06-21 12:56:21.728837222 +0300
+@@ -486,7 +486,7 @@
+ 	iface_st->info.mode = vif->mode;
+ 	memcpy(iface_st->info.mac_addr, vif->ndev->dev_addr,
+ 		   ETH_ALEN);
+-	iface_st->info.state = vif->sm_state;
++	iface_st->info.state = (enum wifi_connection_state)vif->sm_state;
+ 	memcpy(iface_st->info.ssid, vif->ssid,
+ 		   IEEE80211_MAX_SSID_LEN);
+ 	ether_addr_copy(iface_st->info.bssid, vif->bssid);
+@@ -575,7 +575,7 @@
+ 	struct nlattr *tb[SPRDWL_LL_STATS_CLR_MAX + 1];
+ 	u32 *stats_clear_rsp_mask, stats_clear_req_mask = 0;
+ 	u16 r_len = sizeof(*stats_clear_rsp_mask);
+-	u8 r_buf[r_len];
++	u8 r_buf[sizeof(*stats_clear_rsp_mask)];
+ 	u32 reply_length, ret, err;
+ 
+ 	struct sprdwl_priv *priv = wiphy_priv(wiphy);
+diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c b/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c
+--- a/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c	2025-06-21 12:28:39.706534426 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c	2025-06-21 13:03:14.502033396 +0300
+@@ -1568,6 +1568,7 @@
+ 	case UPD_LUT_INDEX:
+ 		peer_entry_delba((void *)intf, i);
+ 		sprdwl_dis_flush_txlist(intf, i);
++		fallthrough;
+ 	case ADD_LUT_INDEX:
+ 		intf->peer_entry[i].lut_index = i;
+ 		intf->peer_entry[i].ctx_id = sta_lut->ctx_id;
