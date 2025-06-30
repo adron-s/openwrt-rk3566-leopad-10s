@@ -227,8 +227,16 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c b/drivers/net/wirel
  }
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireless/uwe5622/unisocwifi/main.c
 --- a/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-21 12:28:39.703534302 +0300
-+++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-27 16:32:45.206250982 +0300
-@@ -944,12 +944,12 @@
++++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-30 14:51:32.359485059 +0300
+@@ -15,6 +15,7 @@
+  * GNU General Public License for more details.
+  */
+ 
++#include <linux/firmware.h>
+ #include "sprdwl.h"
+ #include "npi.h"
+ #include "cfg80211.h"
+@@ -944,12 +945,12 @@
  		if (!is_zero_ether_addr(sa->sa_data)) {
  			vif->has_rand_mac = true;
  			memcpy(vif->random_mac, sa->sa_data, ETH_ALEN);
@@ -243,7 +251,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  		}
  	}
  	/*return success to pass vts test*/
-@@ -1118,6 +1118,7 @@
+@@ -1118,6 +1119,7 @@
  	case NL80211_IFTYPE_P2P_CLIENT:
  	case NL80211_IFTYPE_P2P_GO:
  		addr[4] ^= 0x80;
@@ -251,7 +259,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	case NL80211_IFTYPE_P2P_DEVICE:
  		addr[0] ^= 0x02;
  		break;
-@@ -1448,7 +1449,7 @@
+@@ -1448,7 +1450,7 @@
  	ndev->features |= NETIF_F_SG;
  	SET_NETDEV_DEV(ndev, wiphy_dev(priv->wiphy));
  
@@ -260,7 +268,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  
  #ifdef CONFIG_P2P_INTF
  	if (type == NL80211_IFTYPE_P2P_DEVICE)
-@@ -1456,7 +1457,7 @@
+@@ -1456,7 +1458,7 @@
  #endif
  
  	/* register new Ethernet interface */
@@ -269,7 +277,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	if (ret) {
  		wl_ndev_log(L_ERR, ndev, "failed to regitster netdev(%d)!\n", ret);
  		goto err;
-@@ -1478,7 +1479,7 @@
+@@ -1478,7 +1480,7 @@
  	if (vif->priv->fw_capa & SPRDWL_CAPA_MC_FILTER)
  		kfree(vif->mc_filter);
  	sprdwl_deinit_vif(vif);
@@ -278,7 +286,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  }
  
  struct wireless_dev *sprdwl_add_iface(struct sprdwl_priv *priv,
-@@ -1528,9 +1529,33 @@
+@@ -1528,9 +1530,33 @@
  	return 0;
  }
  
@@ -312,7 +320,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  
  next_intf:
  	spin_lock_bh(&priv->list_lock);
-@@ -1538,7 +1563,9 @@
+@@ -1538,7 +1564,9 @@
  		list_del(&vif->vif_node);
  		spin_unlock_bh(&priv->list_lock);
  		rtnl_lock();
@@ -322,16 +330,56 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  		rtnl_unlock();
  		goto next_intf;
  	}
-@@ -1584,8 +1611,16 @@
+@@ -1558,6 +1586,43 @@
+ 	sprdwl_intf_debugfs(priv, priv->debugfs);
+ }
+ 
++static void sprdwl_init_mac_addr(struct device *dev, struct sprdwl_priv *priv)
++{
++	int ret;
++	const struct firmware *fw;
++	u8 *mac_addr = priv->mac_addr;
++	const char *fw_path = "unisoc_wifi_mac.txt";
++
++	ret = request_firmware(&fw, fw_path, dev);
++	if (ret) {
++		mac_addr[0] = 0xFF;
++		wl_err("Failed to load mac address file: %s\n", fw_path);
++	} else if (fw->size < 17) {
++		mac_addr[0] = 0xFF;
++		wl_err("MAC address string too short or missing\n");
++	} else {
++		/* Parse the MAC address string from firmware */
++		ret = sscanf(fw->data, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
++			 &mac_addr[0], &mac_addr[1], &mac_addr[2],
++			 &mac_addr[3], &mac_addr[4], &mac_addr[5]);
++		if (ret != 6) {
++			wl_err("Failed to parse MAC address from string\n");
++			mac_addr[0] = 0xFF;
++		}
++	}
++
++	if (mac_addr[0] == 0xFF) {
++		wl_err("Generating ramdom MAC address\n");
++		/* Generate a random MAC address in case of load & parse failure */
++		eth_random_addr(priv->mac_addr);
++		mac_addr[0] = 0x40;
++		mac_addr[1] = 0x45;
++		mac_addr[2] = 0xda;
++	}
++
++	release_firmware(fw);
++}
++
+ int sprdwl_core_init(struct device *dev, struct sprdwl_priv *priv)
+ {
+ 	struct wiphy *wiphy = priv->wiphy;
+@@ -1583,9 +1648,12 @@
+ 		goto out;
  	}
  	sprdwl_init_debugfs(priv);
++	sprdwl_init_mac_addr(dev, priv);
  
-+	/* Generate a random MAC address for wlan0 */
-+	eth_random_addr(priv->mac_addr);
-+	priv->mac_addr[0] = 0x40;
-+	priv->mac_addr[1] = 0x45;
-+	priv->mac_addr[2] = 0xda;
-+
  	rtnl_lock();
 +	wiphy_lock(wiphy);
  	wdev = sprdwl_add_iface(priv, "wlan%d", NL80211_IFTYPE_STATION, NULL);
@@ -339,7 +387,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	rtnl_unlock();
  	if (IS_ERR(wdev)) {
  		wiphy_unregister(wiphy);
-@@ -1595,7 +1630,9 @@
+@@ -1595,7 +1663,9 @@
  
  #ifdef CONFIG_P2P_INTF
  	rtnl_lock();
@@ -349,7 +397,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	rtnl_unlock();
  	if (IS_ERR(wdev)) {
  		wiphy_unregister(wiphy);
-@@ -1639,6 +1676,7 @@
+@@ -1639,6 +1709,7 @@
  
  int sprdwl_core_deinit(struct sprdwl_priv *priv)
  {
