@@ -1080,3 +1080,19 @@ define KernelPackage/sprdwl-ng/description
 endef
 
 $(eval $(call KernelPackage,sprdwl-ng))
+
+define KernelPackage/sprdbt-tty
+  SUBMENU:=$(OTHER_MENU)
+  TITLE:=SPRD Bluetooth TTY Overy SDIO Driver
+  KCONFIG:=CONFIG_TTY_OVERY_SDIO
+  FILES:= \
+	  $(LINUX_DIR)/drivers/net/wireless/uwe5622/tty-sdio/sprdbt_tty.ko
+  AUTOLOAD:=$(call AutoProbe,sprdbt_tty)
+endef
+
+define KernelPackage/sprdbt-tty/description
+  This is a driver for the Spreadtrum tty overy sdio bluetooth device.
+  When compiled as a module, this driver will be called sprdbt_tty.
+endef
+
+$(eval $(call KernelPackage,sprdbt-tty))

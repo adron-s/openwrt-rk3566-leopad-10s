@@ -102,6 +102,12 @@
 		status = "okay";
 	};
 
+	sprd-mtty {
+		compatible = "sprd,mtty";
+		sprd,name = "ttyBT";
+		status = "okay";
+	};
+
 	uwe-bsp {
 		// Think of the BSP as the glue between the Linux kernel and the hardware — it ensures the UWE5621DS can initialize,
 		// communicate, and function properly on your board. Without it, the kernel won’t know how to talk to the chip,
@@ -118,12 +124,6 @@
 		//data-irq;
 		sdma-tx;
 		sdma-rx;
-		status = "okay";
-	};
-
-	sprd-mtty {
-		compatible = "sprd,mtty";
-		sprd,name = "ttyBT";
 		status = "okay";
 	};
 
@@ -732,6 +732,13 @@
 	status = "okay";
 };
 
+&uart1 { /* UWE5622 Bluetooth or GNSS? */
+	pinctrl-0 = <&uart1m0_ctsn>, <&uart1m0_rtsn>, <&uart1m0_xfer>;
+	pinctrl-names = "default";
+	uart-has-rtscts;
+	dma-names = "tx", "rx";
+	status = "disabled";
+};
 
 &uart2 {
 	status = "okay";

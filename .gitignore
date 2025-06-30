@@ -16,6 +16,7 @@
 /target/linux/feeds
 /overlay
 /package/feeds
+!package/feeds/packages/bluez/patches/211-add-sprd-uart.patch
 /package/openwrt-packages
 /*.patch
 /llvm-bpf*
@@ -35,7 +36,7 @@ git-src
 .ccache
 .vscode*
 ttt/
-./fit-to-rockchip/bins/
+fit-to-rockchip/bins/*
 
 target/linux/rockchip/my-rk3566/131-arm64-dts-rockchip-rk3566-add-helix-rockchips.patch
 target/linux/rockchip/my-rk3566/a/

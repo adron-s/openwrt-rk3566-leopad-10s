@@ -2185,7 +2185,7 @@ config BUSYBOX_DEFAULT_READAHEAD
 	default n
 config BUSYBOX_DEFAULT_RFKILL
 	bool
-	default n
+	default y
 config BUSYBOX_DEFAULT_RUNLEVEL
 	bool
 	default n
