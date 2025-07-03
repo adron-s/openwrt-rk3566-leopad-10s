@@ -94,7 +94,7 @@
 		simple-audio-card,name = "rk817_ext";
 		simple-audio-card,aux-devs = <&spk_amp>;
 		simple-audio-card,format = "i2s";
-		simple-audio-card,hp-det-gpio = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
+		simple-audio-card,hp-det-gpio = <&gpio3 RK_PA1 GPIO_ACTIVE_HIGH>;
 		simple-audio-card,mclk-fs = <256>;
 		simple-audio-card,widgets =
 			"Microphone", "Internal Mic",
@@ -116,6 +116,7 @@
 			"Speaker Amp INR", "HPOR",
 			"Internal Speakers", "Speaker Amp OUTL",
 			"Internal Speakers", "Speaker Amp OUTR";
+
 		simple-audio-card,pin-switches = "Internal Speakers";
 
 		simple-audio-card,codec {
@@ -133,7 +134,6 @@
 		pinctrl-0 = <&spk_amp_enable_h>;
 		pinctrl-names = "default";
 		sound-name-prefix = "Speaker Amp";
-		VCC-supply = <&vcc_3v3>;
 	};
 
 	sdio_pwrseq: sdio-pwrseq {
@@ -729,7 +729,7 @@
 	hp-detect {
 		hp_det: hp-det {
 			rockchip,pins =
-				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 

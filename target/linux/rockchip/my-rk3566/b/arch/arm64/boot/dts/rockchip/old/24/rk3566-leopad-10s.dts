@@ -94,7 +94,7 @@
 		simple-audio-card,name = "rk817_ext";
 		simple-audio-card,aux-devs = <&spk_amp>;
 		simple-audio-card,format = "i2s";
-		simple-audio-card,hp-det-gpio = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
+		simple-audio-card,hp-det-gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_HIGH>;
 		simple-audio-card,mclk-fs = <256>;
 		simple-audio-card,widgets =
 			"Microphone", "Internal Mic",

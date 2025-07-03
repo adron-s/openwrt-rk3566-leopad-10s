@@ -24,7 +24,7 @@
 
 	chosen: chosen {
 		stdout-path = "serial2:1500000n8";
-		bootargs = "console=tty0 console=ttyS2,1500000n8 logo.nologo";
+		bootargs = "console=tty0 console=ttyS2,1500000n8 logo.nologo snd_soc_core.dapm_debug=1";
 	};
 
 	adc-keys {
@@ -116,6 +116,7 @@
 			"Speaker Amp INR", "HPOR",
 			"Internal Speakers", "Speaker Amp OUTL",
 			"Internal Speakers", "Speaker Amp OUTR";
+
 		simple-audio-card,pin-switches = "Internal Speakers";
 
 		simple-audio-card,codec {
@@ -729,7 +730,7 @@
 	hp-detect {
 		hp_det: hp-det {
 			rockchip,pins =
-				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
