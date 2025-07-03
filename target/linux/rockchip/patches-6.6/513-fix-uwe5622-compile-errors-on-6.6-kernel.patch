@@ -107,7 +107,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c b/drivers
  {
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c
 --- a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2025-06-21 12:28:39.710534592 +0300
-+++ b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2025-06-27 16:33:39.790537478 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2025-07-03 13:48:19.187889073 +0300
 @@ -429,7 +429,7 @@
  	if (!vif->ndev)
  		mac = vif->wdev.address;
@@ -159,6 +159,33 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c b/drivers/net/wir
  #ifdef STA_SOFTAP_SCC_MODE
  	struct sprdwl_intf *intf = (struct sprdwl_intf *)vif->priv->hw_priv;
  	intf->sta_home_channel = 0;
+@@ -1809,7 +1834,7 @@
+ 	enum sm_state old_state = vif->sm_state;
+ 	int is_wep = (sme->crypto.cipher_group == WLAN_CIPHER_SUITE_WEP40) ||
+ 		(sme->crypto.cipher_group == WLAN_CIPHER_SUITE_WEP104);
+-	int random_mac_flag;
++	//int random_mac_flag;
+ 	int ret = -EPERM;
+ 
+ 	/*workround for bug 795430*/
+@@ -1819,7 +1844,7 @@
+ 		goto err;
+ 	}
+ 
+-	if (vif->mode == SPRDWL_MODE_STATION) {
++	/* if (vif->mode == SPRDWL_MODE_STATION) {
+ 		if (vif->has_rand_mac) {
+ 			 random_mac_flag = SPRDWL_CONNECT_RANDOM_ADDR;
+ 			 ret = wlan_cmd_set_rand_mac(vif->priv, vif->ctx_id,
+@@ -1827,7 +1852,7 @@
+ 			 if (ret)
+ 				 netdev_info(ndev, "Set random mac failed!\n");
+ 		}
+-	}
++	} */
+ 
+ 	memset(&con, 0, sizeof(con));
+ 
 @@ -3278,6 +3303,8 @@
  	.del_station = sprdwl_cfg80211_del_station,
  	.change_station = sprdwl_cfg80211_change_station,
@@ -227,7 +254,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c b/drivers/net/wirel
  }
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireless/uwe5622/unisocwifi/main.c
 --- a/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-21 12:28:39.703534302 +0300
-+++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-06-30 14:51:32.359485059 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c	2025-07-03 14:02:31.946254916 +0300
 @@ -15,6 +15,7 @@
   * GNU General Public License for more details.
   */
@@ -330,7 +357,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  		rtnl_unlock();
  		goto next_intf;
  	}
-@@ -1558,6 +1586,43 @@
+@@ -1558,6 +1586,49 @@
  	sprdwl_intf_debugfs(priv, priv->debugfs);
  }
  
@@ -341,28 +368,34 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
 +	u8 *mac_addr = priv->mac_addr;
 +	const char *fw_path = "unisoc_wifi_mac.txt";
 +
++	memset(mac_addr, 0x0, sizeof(priv->mac_addr));
 +	ret = request_firmware(&fw, fw_path, dev);
 +	if (ret) {
 +		mac_addr[0] = 0xFF;
-+		wl_err("Failed to load mac address file: %s\n", fw_path);
++		pr_err("sprdwl:Failed to load mac address file: %s\n", fw_path);
 +	} else if (fw->size < 17) {
 +		mac_addr[0] = 0xFF;
-+		wl_err("MAC address string too short or missing\n");
++		pr_err("sprdwl:MAC address string too short or missing !!!\n");
 +	} else {
 +		/* Parse the MAC address string from firmware */
 +		ret = sscanf(fw->data, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 +			 &mac_addr[0], &mac_addr[1], &mac_addr[2],
 +			 &mac_addr[3], &mac_addr[4], &mac_addr[5]);
 +		if (ret != 6) {
-+			wl_err("Failed to parse MAC address from string\n");
++			pr_err("sprdwl:Failed to parse MAC address from string !!!\n");
 +			mac_addr[0] = 0xFF;
++		} else {
++			pr_info("sprdwl:FW-set MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n",
++				mac_addr[0], mac_addr[1], mac_addr[2],
++				mac_addr[3], mac_addr[4], mac_addr[5]
++			);
 +		}
 +	}
 +
 +	if (mac_addr[0] == 0xFF) {
-+		wl_err("Generating ramdom MAC address\n");
++		pr_err("sprdwl:Generating ramdom MAC address !!!\n");
 +		/* Generate a random MAC address in case of load & parse failure */
-+		eth_random_addr(priv->mac_addr);
++		eth_random_addr(mac_addr);
 +		mac_addr[0] = 0x40;
 +		mac_addr[1] = 0x45;
 +		mac_addr[2] = 0xda;
@@ -374,7 +407,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  int sprdwl_core_init(struct device *dev, struct sprdwl_priv *priv)
  {
  	struct wiphy *wiphy = priv->wiphy;
-@@ -1583,9 +1648,12 @@
+@@ -1583,9 +1654,12 @@
  		goto out;
  	}
  	sprdwl_init_debugfs(priv);
@@ -387,7 +420,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	rtnl_unlock();
  	if (IS_ERR(wdev)) {
  		wiphy_unregister(wiphy);
-@@ -1595,7 +1663,9 @@
+@@ -1595,7 +1669,9 @@
  
  #ifdef CONFIG_P2P_INTF
  	rtnl_lock();
@@ -397,7 +430,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	rtnl_unlock();
  	if (IS_ERR(wdev)) {
  		wiphy_unregister(wiphy);
-@@ -1639,6 +1709,7 @@
+@@ -1639,6 +1715,7 @@
  
  int sprdwl_core_deinit(struct sprdwl_priv *priv)
  {
@@ -407,7 +440,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireles
  	if (priv->fw_capa & SPRDWL_CAPA_NS_OFFLOAD)
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wireless/uwe5622/unisocwifi/Makefile
 --- a/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-21 12:28:39.663532647 +0300
-+++ b/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-06-27 20:03:29.536446370 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/Makefile	2025-07-03 13:42:43.481927546 +0300
 @@ -2,6 +2,8 @@
  all_dependencies := driver
  
@@ -417,7 +450,7 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wirel
  ifneq ($(UNISOC_BSP_INCLUDE),)
  ccflags-y += -I$(UNISOC_BSP_INCLUDE)
  endif
-@@ -22,9 +24,9 @@
+@@ -22,13 +24,13 @@
  
  ####add cflag######
  ccflags-y += -DUWE5621_FTR
@@ -430,6 +463,11 @@ diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/Makefile b/drivers/net/wirel
  ccflags-y += -DACS_SUPPORT -DRX_HW_CSUM
  ccflags-y += -DWMMAC_WFA_CERTIFICATION
  ccflags-y += -DCOMPAT_SAMPILE_CODE
+-ccflags-y += -DRND_MAC_SUPPORT
++#ccflags-y += -DRND_MAC_SUPPORT
+ #ccflags-y += -DSOFTAP_HOOK
+ ccflags-y += -DATCMD_ASSERT
+ ccflags-y += -DTCPACK_DELAY_SUPPORT
 diff -rNu a/drivers/net/wireless/uwe5622/unisocwifi/reorder.c b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c
 --- a/drivers/net/wireless/uwe5622/unisocwifi/reorder.c	2025-06-21 12:28:39.667532812 +0300
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c	2025-06-21 13:23:08.300755049 +0300
