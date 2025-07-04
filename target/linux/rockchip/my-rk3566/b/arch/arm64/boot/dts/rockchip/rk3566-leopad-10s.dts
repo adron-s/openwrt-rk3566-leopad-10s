@@ -117,6 +117,7 @@
 			"Internal Speakers", "Speaker Amp OUTL",
 			"Internal Speakers", "Speaker Amp OUTR";
 		simple-audio-card,pin-switches = "Internal Speakers";
+		simple-audio-card,jack-second-pin = "Internal Speakers";
 
 		simple-audio-card,codec {
 			sound-dai = <&rk817>;

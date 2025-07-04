@@ -1,0 +1,68 @@
+diff -rNu a/include/sound/simple_card_utils.h b/include/sound/simple_card_utils.h
+--- a/include/sound/simple_card_utils.h	2025-07-04 10:11:19.508869663 +0300
++++ b/include/sound/simple_card_utils.h	2025-07-04 10:10:25.000614563 +0300
+@@ -44,7 +44,7 @@
+ 
+ struct asoc_simple_jack {
+ 	struct snd_soc_jack jack;
+-	struct snd_soc_jack_pin pin;
++	struct snd_soc_jack_pin pins[2];
+ 	struct snd_soc_jack_gpio gpio;
+ };
+ 
+diff -rNu a/sound/soc/generic/simple-card-utils.c b/sound/soc/generic/simple-card-utils.c
+--- a/sound/soc/generic/simple-card-utils.c	2025-04-10 15:37:44.000000000 +0300
++++ b/sound/soc/generic/simple-card-utils.c	2025-07-04 10:41:53.096291757 +0300
+@@ -744,10 +744,13 @@
+ 			  char *pin)
+ {
+ 	struct device *dev = card->dev;
++	struct device_node *np = dev->of_node;
+ 	struct gpio_desc *desc;
+ 	char prop[128];
+ 	char *pin_name;
++	const char *pin2_name = NULL;
+ 	char *gpio_name;
++	unsigned int num_pins = 1;
+ 	int mask;
+ 	int error;
+ 
+@@ -761,6 +764,12 @@
+ 		pin_name	= pin ? pin : "Headphones";
+ 		gpio_name	= "Headphone detection";
+ 		mask		= SND_JACK_HEADPHONE;
++
++		/* Read optional second pin name from device tree */
++		of_property_read_string(np, "simple-audio-card,jack-second-pin", &pin2_name);
++		if (pin2_name) {
++			num_pins += 1;
++		}
+ 	} else {
+ 		snprintf(prop, sizeof(prop), "%smic-det", prefix);
+ 		pin_name	= pin ? pin : "Mic Jack";
+@@ -778,8 +787,14 @@
+ 		if (error)
+ 			return error;
+ 
+-		sjack->pin.pin		= pin_name;
+-		sjack->pin.mask		= mask;
++		sjack->pins[0].pin		= pin_name;
++		sjack->pins[0].mask		= mask;
++
++		if (pin2_name) {
++			sjack->pins[1].pin		= pin2_name;
++			sjack->pins[1].mask		= mask;
++			sjack->pins[1].invert = 1;
++		}
+ 
+ 		sjack->gpio.name	= gpio_name;
+ 		sjack->gpio.report	= mask;
+@@ -787,7 +802,7 @@
+ 		sjack->gpio.debounce_time = 150;
+ 
+ 		snd_soc_card_jack_new_pins(card, pin_name, mask, &sjack->jack,
+-					   &sjack->pin, 1);
++					   sjack->pins, num_pins);
+ 
+ 		snd_soc_jack_add_gpios(&sjack->jack, 1, &sjack->gpio);
+ 	}
