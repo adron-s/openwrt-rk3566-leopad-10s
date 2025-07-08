@@ -1,0 +1,37 @@
+diff -rNu a/sound/soc/codecs/bt-sco.c b/sound/soc/codecs/bt-sco.c
+--- a/sound/soc/codecs/bt-sco.c	2025-07-04 18:06:25.411413695 +0300
++++ b/sound/soc/codecs/bt-sco.c	2025-07-04 16:15:12.019119056 +0300
+@@ -30,14 +30,14 @@
+ 		.playback = {
+ 			.stream_name = "Playback",
+ 			.channels_min = 1,
+-			.channels_max = 1,
++			.channels_max = 2,
+ 			.rates = SNDRV_PCM_RATE_8000,
+ 			.formats = SNDRV_PCM_FMTBIT_S16_LE,
+ 		},
+ 		.capture = {
+ 			 .stream_name = "Capture",
+ 			.channels_min = 1,
+-			.channels_max = 1,
++			.channels_max = 2,
+ 			.rates = SNDRV_PCM_RATE_8000,
+ 			.formats = SNDRV_PCM_FMTBIT_S16_LE,
+ 		},
+@@ -47,14 +47,14 @@
+ 		.playback = {
+ 			.stream_name = "Playback",
+ 			.channels_min = 1,
+-			.channels_max = 1,
++			.channels_max = 2,
+ 			.rates = SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000,
+ 			.formats = SNDRV_PCM_FMTBIT_S16_LE,
+ 		},
+ 		.capture = {
+ 			 .stream_name = "Capture",
+ 			.channels_min = 1,
+-			.channels_max = 1,
++			.channels_max = 2,
+ 			.rates = SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000,
+ 			.formats = SNDRV_PCM_FMTBIT_S16_LE,
+ 		},
