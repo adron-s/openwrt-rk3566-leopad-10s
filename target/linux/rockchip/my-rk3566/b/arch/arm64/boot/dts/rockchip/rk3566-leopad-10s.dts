@@ -137,6 +137,38 @@
 		VCC-supply = <&vcc_3v3>;
 	};
 
+	bt_sco: bt-sco {
+		/* Bluetooth-SCO (Synchronous Connection-Oriented link) audio CODEC */
+		compatible = "delta,dfbmcs320";
+		#sound-dai-cells = <0>;
+		status = "okay";
+	};
+
+	bt-sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "dsp_b";
+		simple-audio-card,bitclock-inversion = <1>;
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,name = "rockchip,bt";
+		simple-audio-card,bitclock-master = <&bt_sco>;
+		simple-audio-card,frame-master = <&bt_sco>;
+		simple-audio-card,widgets =
+			"Microphone", "RX",
+			"Speaker", "TX";
+		simple-audio-card,routing =
+			"BT_SCO_TX", "RX",
+			"TX", "BT_SCO_RX";
+
+		simple-audio-card,codec {
+			sound-dai = <&bt_sco>;
+		};
+
+		simple-audio-card,cpu {
+			sound-dai = <&i2s2_2ch>;
+		};
+
+	};
+
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&rk817 1>;
@@ -656,6 +688,19 @@
 
 };
 
+&i2c1 {
+	status = "okay";
+
+	ts@40 {
+		status = "okay";
+		//status = "disabled";
+		compatible = "GSL,GSL3673_800X1280";
+		reg = <0x40>;
+		irq-gpios = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
+    rst-gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
+	};
+};
+
 &i2s0_8ch {
 	status = "disabled";
 	/* HDMI */
@@ -674,10 +719,10 @@
 
 &i2s2_2ch {
 	rockchip,trcm-sync-tx-only;
-	status = "disabled";
+	#sound-dai-cells = <0>;
+	status = "okay";
 	/* UWE5621 Bluetooth */
 };
-
 
 &pinctrl {
 	pmic {
