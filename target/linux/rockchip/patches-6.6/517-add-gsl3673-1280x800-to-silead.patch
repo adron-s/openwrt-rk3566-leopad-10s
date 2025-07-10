@@ -1,0 +1,218 @@
+diff -rNu a/drivers/input/touchscreen/silead.c b/drivers/input/touchscreen/silead.c
+--- a/drivers/input/touchscreen/silead.c	2025-07-09 17:56:44.458900110 +0300
++++ b/drivers/input/touchscreen/silead.c	2025-07-10 13:59:12.674030780 +0300
+@@ -58,6 +58,9 @@
+ 
+ #define SILEAD_MAX_FINGERS	10
+ 
++#define SILEAD_X_SIZE_MAX 2048
++#define SILEAD_Y_SIZE_MAX 2048
++
+ enum silead_ts_power {
+ 	SILEAD_POWER_ON  = 1,
+ 	SILEAD_POWER_OFF = 0
+@@ -76,9 +79,17 @@
+ 	int slots[SILEAD_MAX_FINGERS];
+ 	int id[SILEAD_MAX_FINGERS];
+ 	u32 efi_fw_min_max[4];
++	u16 raw_size_conv_x[SILEAD_X_SIZE_MAX];
++	u16 raw_size_conv_y[SILEAD_X_SIZE_MAX];
+ 	bool efi_fw_min_max_set;
+ 	bool pen_supported;
++	bool skip_cmd_reset;
+ 	bool pen_down;
++	bool raw_size_need_conv;
++	u32 ts_size_x;
++	u32 ts_size_y;
++	u32 raw_size_x;
++	u32 raw_size_y;
+ 	u32 pen_x_res;
+ 	u32 pen_y_res;
+ 	int pen_up_count;
+@@ -200,6 +211,26 @@
+ 	}
+ }
+ 
++static u16 raw_size_to_ts(struct silead_ts_data *data, u16 val, char axis)
++{
++	u16 *cod;
++	u32 raw_max_k;
++
++	if (axis == 'x') {
++		cod = data->raw_size_conv_x;
++		raw_max_k = data->raw_size_x;
++	} else {
++		cod = data->raw_size_conv_y;
++		raw_max_k = data->raw_size_y;
++	}
++
++	if (val >= raw_max_k) {
++		val = raw_max_k - 1;
++	}
++
++	return cod[val];
++}
++
+ static bool silead_ts_handle_pen_data(struct silead_ts_data *data, u8 *buf)
+ {
+ 	u8 *coord = buf + SILEAD_POINT_DATA_LEN;
+@@ -241,6 +272,7 @@
+ 
+ static void silead_ts_read_data(struct i2c_client *client)
+ {
++	u16 x, y;
+ 	struct silead_ts_data *data = i2c_get_clientdata(client);
+ 	struct input_dev *input = data->input;
+ 	struct device *dev = &client->dev;
+@@ -288,9 +320,13 @@
+ 		 */
+ 		data->id[touch_nr] = (bufp[SILEAD_POINT_X_MSB_OFF] &
+ 				      SILEAD_EXTRA_DATA_MASK) >> 4;
+-		touchscreen_set_mt_pos(&data->pos[touch_nr], &data->prop,
+-			get_unaligned_le16(&bufp[SILEAD_POINT_X_OFF]) & 0xfff,
+-			get_unaligned_le16(&bufp[SILEAD_POINT_Y_OFF]) & 0xfff);
++		x = get_unaligned_le16(&bufp[SILEAD_POINT_X_OFF]) & 0xfff;
++		y = get_unaligned_le16(&bufp[SILEAD_POINT_Y_OFF]) & 0xfff;
++		if (data->raw_size_need_conv) {
++			x = raw_size_to_ts(data, x, 'x');
++			y = raw_size_to_ts(data, y, 'y');
++		}
++		touchscreen_set_mt_pos(&data->pos[touch_nr], &data->prop, x, y);
+ 		touch_nr++;
+ 	}
+ 
+@@ -315,12 +351,15 @@
+ static int silead_ts_init(struct i2c_client *client)
+ {
+ 	int error;
++	struct silead_ts_data *data = i2c_get_clientdata(client);
+ 
+-	error = i2c_smbus_write_byte_data(client, SILEAD_REG_RESET,
+-					  SILEAD_CMD_RESET);
+-	if (error)
+-		goto i2c_write_err;
+-	usleep_range(SILEAD_CMD_SLEEP_MIN, SILEAD_CMD_SLEEP_MAX);
++	if (!data->skip_cmd_reset) {
++		error = i2c_smbus_write_byte_data(client, SILEAD_REG_RESET,
++						  SILEAD_CMD_RESET);
++		if (error)
++			goto i2c_write_err;
++		usleep_range(SILEAD_CMD_SLEEP_MIN, SILEAD_CMD_SLEEP_MAX);
++	}
+ 
+ 	error = i2c_smbus_write_byte_data(client, SILEAD_REG_TOUCH_NR,
+ 					  SILEAD_MAX_FINGERS);
+@@ -350,12 +389,15 @@
+ static int silead_ts_reset(struct i2c_client *client)
+ {
+ 	int error;
++	struct silead_ts_data *data = i2c_get_clientdata(client);
+ 
+-	error = i2c_smbus_write_byte_data(client, SILEAD_REG_RESET,
+-					  SILEAD_CMD_RESET);
+-	if (error)
+-		goto i2c_write_err;
+-	usleep_range(SILEAD_CMD_SLEEP_MIN, SILEAD_CMD_SLEEP_MAX);
++	if (!data->skip_cmd_reset) {
++		error = i2c_smbus_write_byte_data(client, SILEAD_REG_RESET,
++						  SILEAD_CMD_RESET);
++		if (error)
++			goto i2c_write_err;
++		usleep_range(SILEAD_CMD_SLEEP_MIN, SILEAD_CMD_SLEEP_MAX);
++	}
+ 
+ 	error = i2c_smbus_write_byte_data(client, SILEAD_REG_CLOCK,
+ 					  SILEAD_CLOCK);
+@@ -582,6 +624,38 @@
+ 	return IRQ_HANDLED;
+ }
+ 
++static int prep_raw_size_conv_data(struct silead_ts_data *data)
++{
++	int i, k;
++	u16 *cod;
++	u32 ts_max_k, raw_max_k;
++	u32 conv_arr_k_len;
++
++	cod = data->raw_size_conv_x;
++	ts_max_k = data->ts_size_x;
++	raw_max_k = data->raw_size_x;
++	conv_arr_k_len = ARRAY_SIZE(data->raw_size_conv_x);
++
++	for (k = 0; k < 2; k++) {
++		if (raw_max_k == 0 || raw_max_k >= conv_arr_k_len) {
++			dev_err(&data->client->dev, "Incorrect raw-size-%c value: %u !",
++				(k == 0 ? 'x' : 'y'), raw_max_k);
++			return -EINVAL;
++		}
++
++		for (i = 0; i < raw_max_k; i++) {
++			cod[i] = DIV_ROUND_CLOSEST(i * ts_max_k, raw_max_k);
++		}
++
++		cod = data->raw_size_conv_y;
++		ts_max_k = data->ts_size_y;
++		raw_max_k = data->raw_size_y;
++		conv_arr_k_len = ARRAY_SIZE(data->raw_size_conv_y);
++	}
++
++	return 0;
++}
++
+ static void silead_ts_read_props(struct i2c_client *client)
+ {
+ 	struct silead_ts_data *data = i2c_get_clientdata(client);
+@@ -599,6 +673,20 @@
+ 	data->pen_supported = device_property_read_bool(dev, "silead,pen-supported");
+ 	device_property_read_u32(dev, "silead,pen-resolution-x", &data->pen_x_res);
+ 	device_property_read_u32(dev, "silead,pen-resolution-y", &data->pen_y_res);
++
++	data->skip_cmd_reset = device_property_read_bool(dev, "silead,skip-cmd-reset");
++
++	error = device_property_read_u32(dev, "silead,raw-size-x", &data->raw_size_x);
++	if (!error)
++		error = device_property_read_u32(dev, "silead,raw-size-y", &data->raw_size_y);
++	if (!error)
++		error = device_property_read_u32(dev, "touchscreen-size-x", &data->ts_size_x);
++	if (!error)
++		error = device_property_read_u32(dev, "touchscreen-size-y", &data->ts_size_y);
++	if (!error && !prep_raw_size_conv_data(data))
++		data->raw_size_need_conv = true;
++	else
++		data->raw_size_need_conv = false;
+ }
+ 
+ #ifdef CONFIG_ACPI
+@@ -674,6 +762,8 @@
+ 	/* We must have the IRQ provided by DT or ACPI subsystem */
+ 	if (client->irq <= 0)
+ 		return -ENODEV;
++	else
++		dev_info(dev, "irq: %d\n", client->irq);
+ 
+ 	data->regulators[0].supply = "vddio";
+ 	data->regulators[1].supply = "avdd";
+@@ -779,6 +869,7 @@
+ 	{ "gsl1680", 0 },
+ 	{ "gsl1688", 0 },
+ 	{ "gsl3670", 0 },
++	{ "gsl3673", 0 },
+ 	{ "gsl3675", 0 },
+ 	{ "gsl3692", 0 },
+ 	{ "mssl1680", 0 },
+@@ -791,6 +882,7 @@
+ 	{ "GSL1680", 0 },
+ 	{ "GSL1688", 0 },
+ 	{ "GSL3670", 0 },
++	{ "GSL3673", 0 },
+ 	{ "GSL3675", 0 },
+ 	{ "GSL3692", 0 },
+ 	{ "MSSL1680", 0 },
+@@ -807,6 +899,7 @@
+ 	{ .compatible = "silead,gsl1680" },
+ 	{ .compatible = "silead,gsl1688" },
+ 	{ .compatible = "silead,gsl3670" },
++	{ .compatible = "silead,gsl3673" },
+ 	{ .compatible = "silead,gsl3675" },
+ 	{ .compatible = "silead,gsl3692" },
+ 	{ },

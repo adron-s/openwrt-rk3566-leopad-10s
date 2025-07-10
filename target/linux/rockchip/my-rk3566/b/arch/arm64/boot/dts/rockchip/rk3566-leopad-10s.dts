@@ -691,13 +691,33 @@
 &i2c1 {
 	status = "okay";
 
-	ts@40 {
+	/* ts@40 {
 		status = "okay";
 		//status = "disabled";
 		compatible = "GSL,GSL3673_800X1280";
 		reg = <0x40>;
 		irq-gpios = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
     rst-gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
+	}; */
+
+	ts@40 {
+		reg = <0x40>;
+		compatible = "silead,gsl3673";
+		pinctrl-names = "default";
+		pinctrl-0 = <&ts_int>;
+		firmware-name = "gsl3673-adreamer-leopad10s.fw";
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PB0 IRQ_TYPE_EDGE_FALLING>;
+		power-gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
+		touchscreen-size-x = <1280>;
+		touchscreen-size-y = <800>;
+		silead,raw-size-x = <1660>;
+		silead,raw-size-y = <890>;
+		//touchscreen-inverted-x;
+		//touchscreen-swapped-x-y;
+		silead,max-fingers = <5>;
+		silead,skip-cmd-reset;
+		status = "okay";
 	};
 };
 
@@ -776,6 +796,11 @@
 		hp_det: hp-det {
 			rockchip,pins =
 				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+	ts {
+		ts_int: ts-int {
+			rockchip,pins = <0 RK_PB0 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
