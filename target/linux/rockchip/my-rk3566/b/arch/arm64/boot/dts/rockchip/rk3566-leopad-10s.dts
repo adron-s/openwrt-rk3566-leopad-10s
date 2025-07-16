@@ -716,7 +716,7 @@
 		//touchscreen-inverted-x;
 		//touchscreen-swapped-x-y;
 		silead,max-fingers = <5>;
-		silead,skip-cmd-reset;
+		silead,dnt-chk-cmd-reset;
 		status = "okay";
 	};
 };
