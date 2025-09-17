@@ -24,10 +24,19 @@ load-module module-stream-restore
 load-module module-card-restore
 
 ### Automatically load driver modules depending on the hardware available
-.ifexists module-detect.so
+#.ifexists module-detect.so
 ### Use the static hardware detection module (for systems that lack udev/hal support)
-load-module module-detect
-.endif
+#load-module module-detect
+#.endif
+
+#load-module module-alsa-sink device=hw:0,0 format=s16le rate=44100 channels=2 mmap=0 tsched=1 tsched_buffer_size=66156 source_name=rk_809
+#load-module module-alsa-source device=hw:0,0 format=s16le rate=44100 channels=2 mmap=0 tsched=1 tsched_buffer_size=66156 source_name=rk_809_in
+#load-module module-alsa-sink device=hw:1,0 format=s16le rate=8000 channels=2 mmap=0 tsched=1 tsched_buffer_size=66156 source_name=bt_pcm
+#load-module module-alsa-source device=hw:1,0 format=s16le rate=8000 channels=2 mmap=0 tsched=1 tsched_buffer_size=66156 source_name=bt_pcm_in
+load-module module-alsa-sink device=hw:0,0 sink_name=rk_809
+load-module module-alsa-source device=hw:0,0 source_name=rk_809_in
+load-module module-alsa-sink device=hw:1,0 sink_name=bt_pcm
+load-module module-alsa-source device=hw:1,0 source_name=bt_pcm_in
 
 ### Load several protocols
 .ifexists module-esound-protocol-unix.so
@@ -51,8 +60,8 @@ load-module module-suspend-on-idle
 load-module module-position-event-sounds
 
 ### Bluetooth
-load-module module-bluetooth-discover
-load-module module-bluetooth-policy
+load-module module-bluetooth-discover headset=native autodetect_mtu=true enable_msbc=true enable_native_hfp_hf=true
+load-module module-bluetooth-policy auto_switch=1
 
 ### Allow including a system.pa.d directory, which if present, can be used
 ### for additional configuration snippets.

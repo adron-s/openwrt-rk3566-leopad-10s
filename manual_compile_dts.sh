@@ -9,12 +9,15 @@ OPENWRT_BUILD_DIR=${OPENWRT_DIR}/build_dir/target-aarch64_generic_musl/linux-roc
 OPENWRT_KERNEL_DIR=${OPENWRT_DIR}/build_dir/target-aarch64_generic_musl/linux-rockchip_armv8/linux-6.6.87
 KERNEL_DTS_DIR=${OPENWRT_KERNEL_DIR}/arch/arm64/boot/dts/rockchip
 PATCH_DTS_DIR=${OPENWRT_DIR}/target/linux/rockchip/my-rk3566/b/arch/arm64/boot/dts/rockchip
-DTB_FILE_GEN=image-rk3566-rockchip-generic.dtb
-DTB_FILE_LEO=image-rk3566-leopad-10s.dtb
-DTB_FILE=${DTB_FILE_LEO}
-#DTB_FILE=${DTB_FILE_GEN}
-KERNEL_DTB_FILE=$(echo "${DTB_FILE}" | sed 's/image-//')
-KERNEL_DTS_FILE=$(echo "${KERNEL_DTB_FILE}" | sed 's/\.dtb/\.dts/')
+
+#DTB_PREFIX=image-rk3566-rockchip-generic
+#DTB_PREFIX=image-rk3566-leopad-10s
+DTB_PREFIX=image-rk3568-k3-arj10x
+
+DTB_FILE="${DTB_PREFIX}.dtb"
+KERNEL_DTB_PREFIX=$(echo "${DTB_PREFIX}" | sed 's/image-//')
+KERNEL_DTB_FILE="${KERNEL_DTB_PREFIX}.dtb"
+KERNEL_DTS_FILE="${KERNEL_DTB_PREFIX}.dts"
 
 rm -f ${OPENWRT_BUILD_DIR}/${DTB_FILE}
 rm -f ${KERNEL_DTS_DIR}/${KERNEL_DTB_FILE}

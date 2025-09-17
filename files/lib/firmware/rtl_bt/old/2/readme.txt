@@ -1,0 +1,2 @@
+From android vendor partition.
+

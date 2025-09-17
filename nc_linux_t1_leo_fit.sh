@@ -6,4 +6,6 @@
 RESULT_DIR3=./fit-to-rockchip/bins
 RESULT_FILE3_LEO=openwrt_new_fit.img
 
+echo "Ready for NC"
+
 cat ${RESULT_DIR3}/${RESULT_FILE3_LEO} | nc -l -p 1111 -q 1

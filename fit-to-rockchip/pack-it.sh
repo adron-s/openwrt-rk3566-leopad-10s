@@ -7,10 +7,11 @@ RESOURCE_DIR=${BINS_DIR}/resource_tmp
 RESOURCE_IMG=${BINS_DIR}/resource.img
 RESULT_FILE=${BINS_DIR}/openwrt_new_fit.img
 KERNEL_FILE=Image-initramfs # ARM64 image
-DTB_FILE_GEN=image-rk3566-rockchip-generic.dtb
-DTB_FILE_LEO=image-rk3566-leopad-10s.dtb
-DTB_FILE=${DTB_FILE_LEO}
-#DTB_FILE=${DTB_FILE_GEN}
+
+#DTB_PREFIX=image-rk3566-rockchip-generic
+#DTB_PREFIX=image-rk3566-leopad-10s
+DTB_PREFIX=image-rk3568-k3-arj10x
+DTB_FILE="${DTB_PREFIX}.dtb"
 OPENWRT_DIR=/home/adron/rockchip/openwrt
 OPENWRT_KERNEL_BUILD_DIR=${OPENWRT_DIR}/build_dir/target-aarch64_generic_musl/linux-rockchip_armv8
 OPENWRT_KERNEL_DIR=${OPENWRT_KERNEL_BUILD_DIR}/linux-6.6.87
@@ -46,3 +47,12 @@ dtc -I dtb -O dts -o ${BINS_DIR}/openwrt_kernel_fdt-XXL.dts ${BINS_DIR}/dtb.img 
 
 echo ""
 echo "The result (FIT image) file is: ${RESULT_FILE}"
+
+get_result_file_size() {
+	du -b ${RESULT_FILE} | awk '{ print $1 }'
+}
+
+[ "${1}" = "nc" ] && {
+	echo "Ready for NC"
+	cat ${RESULT_FILE} | pv -s $(get_result_file_size) | nc -l -p 1111 -q 1
+}

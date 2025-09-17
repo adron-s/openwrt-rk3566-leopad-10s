@@ -1,3 +1,4 @@
 #!/bin/sh
 
-amixer -c 0 sset Master 80%
+amixer -c 0 sset "Master" 88%
+amixer -c 0 sset "Mic Capture Gain" 60%

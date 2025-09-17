@@ -15,7 +15,7 @@ RESULT_SIZE=$(du -b ${RESULT_DIR}/${RESULT_FILE} | awk '{print $1}')
 
 if [ "${1}" = "leo" ]; then
 #	echo "${RESULT_DIR}"
-	cat ${RESULT_DIR3}/${RESULT_FILE3_LEO} | nc -l -p 1111 -q 1
+#	cat ${RESULT_DIR3}/${RESULT_FILE3_LEO} | nc -l -p 1111 -q 1
 	cat ${RESULT_DIR}/${RESULT_FILE2_LEO} | nc -l -p 1111 -q 1
 else
 	cat ${RESULT_DIR3}/${RESULT_FILE3_GEN} | nc -l -p 1111 -q 1

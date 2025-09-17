@@ -5,7 +5,7 @@ PART_NAME=${1:-"recovery"}
 FW_FILE=/tmp/fw.bin
 
 get_boot_part() {
-	blkid | grep -E "\"${PART_NAME}" | head -n 1 | sed 's/: .*//'
+	blkid | grep -E "\"${PART_NAME}" | sort | head -n 1 | sed 's/: .*//'
 }
 
 get_real_part_name() {

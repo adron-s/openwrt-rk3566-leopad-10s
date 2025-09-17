@@ -11,6 +11,16 @@ OPENWRT_ARM64_KERNEL_IMG=${OPENWRT_KERNEL_BUILD_DIR}/${KERNEL_FILE}
 export STAGING_DIR=${OPENWRT_STAGING_DIR}
 export PATH="${OPENWRT_STAGING_DIR}/toolchain-aarch64_generic_gcc-14.2.0_musl/bin:${OPENWRT_STAGING_DIR}/host/bin:${PATH}"
 
+get_config_initramfs_source() {
+	cat ${OPENWRT_KERNEL_DIR}/.config | grep -E "^CONFIG_INITRAMFS_SOURCE=" | \
+	sed 's/CONFIG_INITRAMFS_SOURCE=//g;s/"//g'
+}
+
+[ -z "$(get_config_initramfs_source)" ] && {
+	echo "Please check CONFIG_INITRAMFS_SOURCE in ${OPENWRT_KERNEL_DIR}/.config"
+	exit 20
+}
+
 echo "Compilling the current kernel with the current .config"
 
 make -C ${OPENWRT_KERNEL_DIR} \
