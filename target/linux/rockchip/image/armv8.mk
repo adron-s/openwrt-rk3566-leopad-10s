@@ -83,6 +83,16 @@ define Device/adreamer_leopad-10s
 endef
 TARGET_DEVICES += adreamer_leopad-10s
 
+define Device/k3-arj10x
+  DEVICE_VENDOR := K3
+  DEVICE_MODEL := ARJ 10X
+  SOC := rk3568
+  DEVICE_PACKAGES := kmod-r8169
+  KERNEL_LOADADDR := 0x00a80000
+  DEVICE_DTS_LOADADDR := 0x0a10d000
+endef
+TARGET_DEVICES += k3-arj10x
+
 define Device/helix_rockchip-generic
   DEVICE_VENDOR := HeliX
   DEVICE_MODEL := Rockchip Generic
