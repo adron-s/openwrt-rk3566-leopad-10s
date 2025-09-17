@@ -1657,7 +1657,7 @@ config BUSYBOX_DEFAULT_LSPCI
 	default y
 config BUSYBOX_DEFAULT_LSUSB
 	bool
-	default y
+	default n
 config BUSYBOX_DEFAULT_MDEV
 	bool
 	default n
