@@ -1,0 +1,14 @@
+diff -rNu a/sound/soc/codecs/rk817_codec.c b/sound/soc/codecs/rk817_codec.c
+--- a/sound/soc/codecs/rk817_codec.c	2025-09-12 15:11:02.926888627 +0300
++++ b/sound/soc/codecs/rk817_codec.c	2025-09-12 15:12:09.219719900 +0300
+@@ -137,8 +137,8 @@
+ 	/* capture path R */
+ 	SND_SOC_DAPM_ADC("ADC R", "Capture", RK817_CODEC_AADC_CFG0, 6, 1),
+ 	SND_SOC_DAPM_SUPPLY("PGA R Power On", RK817_CODEC_AMIC_CFG0, 4, 1, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("Mic Boost R1", RK817_CODEC_AMIC_CFG0, 3, 0, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("Mic Boost R2", RK817_CODEC_AMIC_CFG0, 3, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY("Mic Boost R1", RK817_CODEC_AMIC_CFG0, 1, 0, NULL, 0),
++	SND_SOC_DAPM_SUPPLY("Mic Boost R2", RK817_CODEC_AMIC_CFG0, 0, 0, NULL, 0),
+ 
+ 	/* playback path common */
+ 	SND_SOC_DAPM_SUPPLY("DAC Clock", RK817_CODEC_DTOP_DIGEN_CLKE, 3, 0, NULL, 0),
