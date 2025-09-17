@@ -3,6 +3,9 @@
 This project includes a working driver for WiFi Unisoc UWE5621 Wi-Fi 5/BT5 under Linux 6.6 kernel.
 It also contains the simple-panel-dsi driver for working with legacy dts LCD panel description format.
 
+This project also includes support for the RK3568 Rugged Tablet (RK3568_r - K3-ARJ10A). Support for the
+TI BQ25703 charger was added specifically for this tablet.
+
 OpenWRT was chosen for the ability to quickly make changes to the Linux kernel and test these changes
 on real hardware (Adreamer Leopad 10S tablet on the RK3566 platform - for 73 euros from Aliexpress).
 
